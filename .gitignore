@@ -66,3 +66,41 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Cursor / IDE files
+.cursor/
+.vscode/
+.idea/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Local environment and secrets
+.env
+.env.*
+
+# Generated simulation files
+*.vcd
+*.fst
+*.vvp
+*.wlf
+*.vcd.gz
+sim_build/
+obj_dir/
+.Xil/

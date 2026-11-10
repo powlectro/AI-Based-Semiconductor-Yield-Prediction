@@ -1,0 +1,15 @@
+{
+  "samples": 1567,
+  "sensor_features": 590,
+  "passing_samples": 1463,
+  "failing_samples": 104,
+  "failure_rate_percent": 6.637,
+  "pass_to_fail_ratio": 14.067,
+  "missing_cell_percent": 4.538,
+  "features_completely_missing": 0,
+  "features_at_least_50_percent_missing": 28,
+  "features_constant_or_all_missing": 116,
+  "unique_timestamps": 1534,
+  "earliest_timestamp": "2008-07-19T11:55:00",
+  "latest_timestamp": "2008-10-17T06:07:00"
+}

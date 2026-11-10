@@ -1,0 +1,7 @@
+# Step 1: data loading and exploratory data analysis
+numpy>=1.26
+pandas>=2.1
+matplotlib>=3.8
+# Used in subsequent steps for machine-learning baselines
+scikit-learn>=1.4
+ipykernel>=6
