@@ -1,0 +1,28 @@
+{
+  "best_validation_model": {
+    "model": "random_forest",
+    "features": 32,
+    "threshold": 0.15,
+    "accuracy": 0.6242038216560509,
+    "failure_precision": 0.11811023622047244,
+    "failure_recall": 0.7142857142857143,
+    "false_positive_rate": 0.3822525597269625,
+    "f1": 0.20270270270270271,
+    "pr_auc": 0.15434716301185897,
+    "roc_auc": 0.6726799934991061,
+    "caught_failures_tp": 15,
+    "escaped_failures_fn": 6,
+    "false_alarms_fp": 112,
+    "true_pass_tn": 181,
+    "screening_cost": 172,
+    "cost_at_threshold_050": 202
+  },
+  "candidate_count": 9,
+  "threshold_candidates": "0.05 to 0.95 in 0.05 steps",
+  "cost_assumptions": {
+    "escaped_failure": 10,
+    "false_alarm": 1,
+    "note": "Illustrative costs, not actual fab prices."
+  },
+  "warning": "Models and thresholds were selected using only 21 validation failures. Test remains untouched. Probability scores may be uncalibrated."
+}

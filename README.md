@@ -113,3 +113,108 @@ No new dependencies beyond Step 1's `requirements.txt` are needed. The `scikit-l
 ## Next step
 
 Compare logistic regression, random forest, and a small neural network using the **same fixed splits**. Compare average precision, recall, FPR, and scenario cost. Select candidate(s) for fixed-point export and SystemVerilog verification.
+
+
+## Step 3: ML Model Training and Comparison
+
+This stage compares three machine learning models for predicting semiconductor manufacturing failures using the SECOM dataset.
+
+### Models
+
+- Logistic Regression
+- Random Forest
+- Small Neural Network (MLP)
+
+Each model is evaluated using 8, 16, and 32 selected sensor features, giving 9 total experiments.
+
+### Methodology
+
+The dataset uses the same stratified 60/20/20 split as Step 2.
+
+- Training: Fit preprocessing and train models.
+- Validation: Compare models and select classification thresholds.
+- Test: Held out for final evaluation.
+
+Class imbalance is addressed using class weighting for logistic regression and random forest, and training-only oversampling for the neural network.
+
+### Evaluation
+
+Models are compared using:
+- Accuracy
+- Failure precision and recall
+- False positive rate
+- F1 score
+- Precision-recall AUC (average precision)
+- ROC-AUC
+- Confusion matrices
+- Illustrative manufacturing screening cost
+
+Screening cost = 10 * escaped failures + 1 * false alarms.
+
+The cost weights are hypothetical and are used to study the trade-off between catching bad samples and unnecessarily rejecting good samples.
+
+### Run Step 3
+
+```powershell
+.\.venv\Scripts\python.exe scripts/03_train_compare.py
+```
+
+### Run Tests
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+```
+
+### Outputs
+
+Reports:
+- reports/step3_validation_results.csv
+- reports/step3_threshold_sweep.csv
+- reports/step3_selection.json
+
+Figures:
+- reports/figures/step3_precision_recall.png
+- reports/figures/step3_roc_curves.png
+- reports/figures/step3_best_confusion_matrix.png
+
+Trained models are saved locally under artifacts/.
+
+### Hardware Direction
+
+The project aims to identify a compact model that can eventually be implemented using fixed-point SystemVerilog.
+
+Logistic regression is an initial hardware candidate because its inference requires a weighted sum and threshold comparison.
+
+The final hardware model will be selected after further evaluation and quantization experiments.
+
+### Limitations
+
+SECOM contains relatively few failing samples, so validation performance is uncertain. Model and threshold selection on the same validation set may be optimistic. The test set remains untouched.
+
+The class-weighted and oversampled models' probability scores are not necessarily calibrated.
+```
+
+
+### Step 3 Results
+
+Nine models were trained using 8, 16, and 32 features.
+
+The best validation results under the illustrative
+screening cost (10 × FN + FP) were:
+
+| Model | Features | Failure Recall | False Alarms | Cost |
+|---|---|---|---|---|
+| Random Forest | 32 | 71.4% | 112 | 172 |
+| Logistic Regression | 16 | 57.1% | 85 | 175 |
+| Logistic Regression | 8 | 42.9% | 58 | 178 |
+
+Random forest achieved the lowest validation cost,
+but logistic regression with 16 features provides
+a simpler candidate for hardware implementation.
+
+The screening cost weights are hypothetical.
+Results are preliminary because model and threshold
+selection used only 21 validation failures.
+
+All nine models were trained successfully.
+The test set remains untouched.
