@@ -104,3 +104,6 @@ Thumbs.db
 sim_build/
 obj_dir/
 .Xil/
+
+# Locally generated trained models
+artifacts/*.joblib

@@ -1,0 +1,23 @@
+{
+  "seed": 42,
+  "split_strategy": "random stratified 60/20/20; no lot identifiers available",
+  "train": {
+    "samples": 939,
+    "pass": 877,
+    "fail": 62,
+    "failure_rate_percent": 6.603
+  },
+  "validation": {
+    "samples": 314,
+    "pass": 293,
+    "fail": 21,
+    "failure_rate_percent": 6.688
+  },
+  "test": {
+    "samples": 314,
+    "pass": 293,
+    "fail": 21,
+    "failure_rate_percent": 6.688
+  },
+  "caveat": "Time drift has NOT been tested. Holdout test rows must remain sealed until final evaluation."
+}

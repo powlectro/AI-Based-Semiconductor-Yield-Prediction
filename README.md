@@ -61,6 +61,55 @@ export; SystemVerilog inference; Python/RTL equivalence; synthesis; demo.
 - Dataset exploration here is not a deployed predictive capability. Quantified
   yield/cost numbers later will be **scenario estimates**, not real fab savings.
 
-## AI assistance disclosure
-The Georgia Tech course syllabus permits AI coding assistants as a learning
-tool with disclosure. Follow your instructor's/team's disclosure expectations.
+
+
+# Step 2 — Leakage-Safe Preprocessing and an Initial Baseline
+
+This **adds** files to the existing Step 1 repository; do not replace existing files.
+
+## Run (Windows PowerShell inside Cursor, from repository root)
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe scripts/02_prepare_features.py
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+```
+
+No new dependencies beyond Step 1's `requirements.txt` are needed. The `scikit-learn` dependency installs `joblib`.
+
+## Data methodology
+
+- Original UCI pass/fail labels are mapped to **0=pass** and **1=fail** in `src/secom_io.py`.
+- Random, stratified **60% train / 20% validation / 20% test**, seed `42`.
+- The SECOM archive has no lot or chamber labels. The random split is an initial baseline, not a guarantee of deployment robustness. Do a separate forward-in-time sensitivity test in a later stage.
+- For each `k` in `{8,16,32}`, use **training rows only** to drop sensors with >=50% missing data and train-constant sensors; median impute; remove remaining zero-variance sensors; z-score scale; select the **top k ANOVA-F sensors based on training labels**.
+- Transformation of validation rows uses only training-fitted statistics and selections.
+- **Test rows must not be used for selecting features/models, adjusting thresholds, or evaluating iteration performance.** They stay sealed for a one-time final assessment.
+- Since failures are rare, compare logistic regression (`class_weight="balanced"`) with a naive always-pass model on **validation only**. Step 2 fixes the prediction threshold at `0.50` for comparability. Step 3 will broaden model choice and evaluate cost-aware thresholds on validation only.
+
+## Generated output
+
+| Output file | Purpose |
+| --- | --- |
+| `reports/split_assignments.csv` | Original row index, assigned split, and timestamp. Reuse these assignments in future stages. |
+| `reports/split_summary.json` | Class counts per partition. |
+| `reports/preprocessing_summary.json` | Drop counts and precise selected sensor order for each k. |
+| `reports/selected_features.csv` | Original sensor name, model-input order, training-only ANOVA-F score, train missingness. |
+| `reports/validation_baseline_metrics.csv` | Validation accuracy, recall, FPR, PR-AUC, confusion matrix counts. |
+| `reports/figures/validation_recall_vs_false_alarms.png` | Visual manufacturing trade-off. |
+| `artifacts/logistic_k08.joblib`, `logistic_k16.joblib`, `logistic_k32.joblib` | Saved preprocessing + logistic model + threshold for reproducibility. **Never load untrusted joblib files.** |
+| `notebooks/02_feature_preprocessing.ipynb` | Notebook walkthrough of the generated evidence. Run after the script. |
+
+## Class concepts
+
+- **Module 2 (FDC):** high-dimensional data cleaning and feature selection before fault classification.
+- **Module 5 (SPC):** training-only sample statistics and variance. The scaling used here is not itself an SPC control chart or process capability assessment.
+- **Module 6 (Virtual Metrology):** data leakage, high-dimensional modeling, limited labeled data, and a need for temporal validation.
+- **Module 7 (Test and Qualification):** failure recall vs unnecessary rejection (FP). Define "escape" here as *model-predicted pass for a failing label*, not a proven fab escape.
+- **Hardware linkage:** feature count 8/16/32 translates into the number of input values and multiply-accumulate terms in a linear classifier. This is not yet an area/timing synthesis result.
+
+**Important:** ANOVA-F selects sensors correlated with the binary training labels, not necessarily physically causal sensors. False negatives/positives are model errors on SECOM labels; their financial impacts cannot be estimated without explicit fab cost assumptions.
+
+## Next step
+
+Compare logistic regression, random forest, and a small neural network using the **same fixed splits**. Compare average precision, recall, FPR, and scenario cost. Select candidate(s) for fixed-point export and SystemVerilog verification.

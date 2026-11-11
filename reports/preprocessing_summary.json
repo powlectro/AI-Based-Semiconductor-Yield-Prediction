@@ -1,0 +1,91 @@
+{
+  "missing_threshold": 0.5,
+  "feature_counts": {
+    "8": {
+      "original_sensors": 590,
+      "dropped_for_missingness": 24,
+      "dropped_train_constant": 122,
+      "extra_zero_variance": 0,
+      "kept_after_filters": 444,
+      "selected_sensor_input_order": [
+        "sensor_059",
+        "sensor_064",
+        "sensor_103",
+        "sensor_114",
+        "sensor_125",
+        "sensor_129",
+        "sensor_351",
+        "sensor_510"
+      ]
+    },
+    "16": {
+      "original_sensors": 590,
+      "dropped_for_missingness": 24,
+      "dropped_train_constant": 122,
+      "extra_zero_variance": 0,
+      "kept_after_filters": 444,
+      "selected_sensor_input_order": [
+        "sensor_059",
+        "sensor_064",
+        "sensor_065",
+        "sensor_103",
+        "sensor_114",
+        "sensor_122",
+        "sensor_125",
+        "sensor_129",
+        "sensor_180",
+        "sensor_213",
+        "sensor_249",
+        "sensor_316",
+        "sensor_351",
+        "sensor_387",
+        "sensor_510",
+        "sensor_511"
+      ]
+    },
+    "32": {
+      "original_sensors": 590,
+      "dropped_for_missingness": 24,
+      "dropped_train_constant": 122,
+      "extra_zero_variance": 0,
+      "kept_after_filters": 444,
+      "selected_sensor_input_order": [
+        "sensor_021",
+        "sensor_028",
+        "sensor_059",
+        "sensor_064",
+        "sensor_065",
+        "sensor_066",
+        "sensor_070",
+        "sensor_103",
+        "sensor_114",
+        "sensor_122",
+        "sensor_125",
+        "sensor_127",
+        "sensor_129",
+        "sensor_130",
+        "sensor_180",
+        "sensor_200",
+        "sensor_203",
+        "sensor_213",
+        "sensor_249",
+        "sensor_316",
+        "sensor_337",
+        "sensor_348",
+        "sensor_351",
+        "sensor_365",
+        "sensor_387",
+        "sensor_431",
+        "sensor_452",
+        "sensor_471",
+        "sensor_475",
+        "sensor_510",
+        "sensor_511",
+        "sensor_521"
+      ]
+    }
+  },
+  "baseline_threshold": 0.5,
+  "baseline_class_weight": "balanced",
+  "selected_from": "training data only"
+}

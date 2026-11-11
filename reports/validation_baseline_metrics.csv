@@ -1,0 +1,5 @@
+model,features,accuracy,balanced_accuracy,precision,failure_recall,f1,false_positive_rate,pr_auc_average_precision,roc_auc,true_pass,false_alarm_fp,escaped_failure_fn,caught_failure_tp
+always_pass,0,0.9331,0.5,0.0,0.0,0.0,0.0,0.0669,0.5,293,0,21,0
+logistic_k08,8,0.6911,0.5913,0.1042,0.4762,0.1709,0.2935,0.1544,0.6423,207,86,11,10
+logistic_k16,16,0.7006,0.6407,0.1237,0.5714,0.2034,0.2901,0.1104,0.6255,208,85,9,12
+logistic_k32,32,0.6879,0.5896,0.1031,0.4762,0.1695,0.2969,0.1496,0.6715,206,87,11,10
