@@ -218,3 +218,21 @@ selection used only 21 validation failures.
 
 All nine models were trained successfully.
 The test set remains untouched.
+
+
+## New: fixed-point / RTL implementation and validation diagnostics
+
+See **[IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md)** for step-by-step commands,
+module interfaces, Icarus simulator invocation, and GitHub submission advice.
+
+New components: `src/fixed_point.py`, `scripts/04_export_fixed_point.py`,
+`hardware/linear_classifier.sv`, `hardware/classifier_tb.sv`,
+`experiments/validation_sensitivity.py`, `experiments/feature_stability.py`,
+and optional `dashboard/app.py` (Gradio).
+
+Run `python -m unittest discover -s tests -v` and then
+`python scripts/03_train_compare.py` followed by
+`python scripts/04_export_fixed_point.py --features 16 --bits 8 12 16`.
+To verify RTL, install Icarus Verilog and add `--simulate`.
+**Hardware simulation and synthesis must be independently performed before
+claiming hardware results.** Test labels remain untouched by the export stage.

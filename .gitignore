@@ -107,3 +107,9 @@ obj_dir/
 
 # Locally generated trained models
 artifacts/*.joblib
+# Generated fixed-point hardware vectors and simulator binaries
+hardware/generated/
+*.vvp
+classifier_sim
+*.fst
+*.vcd

@@ -1,0 +1,4 @@
+features,bits,input_fractional_bits,weight_fractional_bits,validation_samples,agreement_with_float,tp,fn,fp,tn,recall,false_positive_rate,screening_cost,rtl_simulation
+16,8,2,6,314,0.9840764331210191,12,9,86,207,0.5714285714285714,0.2935153583617747,176,not_run
+16,12,6,10,314,1.0,12,9,85,208,0.5714285714285714,0.2901023890784983,175,not_run
+16,16,10,14,314,0.9968152866242038,12,9,86,207,0.5714285714285714,0.2935153583617747,176,not_run
