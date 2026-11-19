@@ -220,19 +220,98 @@ All nine models were trained successfully.
 The test set remains untouched.
 
 
-## New: fixed-point / RTL implementation and validation diagnostics
+## Updates added in November 2026 — Fixed-point inference, RTL, and validation
 
-See **[IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md)** for step-by-step commands,
-module interfaces, Icarus simulator invocation, and GitHub submission advice.
+These changes **extend Steps 1–3**. The existing SECOM data pipeline and the
+logistic regression, random forest, and neural network comparisons remain in place.
+The goal of this update is to move from software-only failure prediction toward a
+compact hardware-oriented classifier and to check how stable our findings are.
 
-New components: `src/fixed_point.py`, `scripts/04_export_fixed_point.py`,
-`hardware/linear_classifier.sv`, `hardware/classifier_tb.sv`,
-`experiments/validation_sensitivity.py`, `experiments/feature_stability.py`,
-and optional `dashboard/app.py` (Gradio).
+### What was added
 
-Run `python -m unittest discover -s tests -v` and then
-`python scripts/03_train_compare.py` followed by
-`python scripts/04_export_fixed_point.py --features 16 --bits 8 12 16`.
-To verify RTL, install Icarus Verilog and add `--simulate`.
-**Hardware simulation and synthesis must be independently performed before
-claiming hardware results.** Test labels remain untouched by the export stage.
+| Addition | Files | What it does |
+| --- | --- | --- |
+| Fixed-point reference implementation | `src/fixed_point.py` | Converts model inputs and coefficients to signed integers, with rounding/clipping and integer linear classification. |
+| Model-to-hardware export | `scripts/04_export_fixed_point.py` | Exports a trained logistic regression model at 8-, 12-, and 16-bit precision, with coefficients, configuration, and validation vectors. |
+| Synthesizable RTL classifier | `hardware/linear_classifier.sv` | Implements the integer weighted sum and decision comparison in SystemVerilog. Assumes sensor values have already been preprocessed. |
+| RTL testbench | `hardware/classifier_tb.sv` | Checks RTL classifications against the Python fixed-point reference vectors when run with Icarus Verilog. |
+| Quantization comparison | `reports/step4_quantization.csv` | Records agreement with floating-point decisions, failure recall, false alarms, and illustrative screening cost by precision. |
+| Validation sensitivity | `experiments/validation_sensitivity.py` | Adds five-fold stratified cross-validation and a chronological development-only split. |
+| Feature-selection stability | `experiments/feature_stability.py` | Counts how consistently each of the 16 selected sensors appears across five training folds. |
+| Optional interactive demo | `dashboard/app.py` | Provides a Gradio interface for exploring example predictions and thresholds; Gradio is installed separately. |
+| Additional tests and instructions | `tests/test_fixed_point.py`, `IMPLEMENTATION_GUIDE.md` | Tests integer encoding/edge cases and documents export, simulation, and limitations. |
+
+### How to reproduce the updates
+
+From the repository root, with Python dependencies from `requirements.txt` installed:
+
+```powershell
+python -m unittest discover -s tests -v
+python scripts/03_train_compare.py
+python scripts/04_export_fixed_point.py --features 16 --bits 8 12 16
+python experiments/validation_sensitivity.py
+python experiments/feature_stability.py
+```
+
+The export script reads locally trained artifacts, so run Step 3 before Step 4.
+Generated RTL constants and validation vectors are written under
+`hardware/generated/k16_b08/`, `k16_b12/`, and `k16_b16/` (these generated
+files are intentionally excluded from Git). Output summaries go to `reports/`.
+
+To run the **RTL simulation**, install Icarus Verilog (`iverilog` and `vvp`)
+or use a CI runner with those tools, then execute:
+
+```powershell
+python scripts/04_export_fixed_point.py --features 16 --bits 8 12 16 --simulate
+```
+
+For the optional Gradio demo:
+
+```powershell
+python -m pip install gradio
+python dashboard/app.py
+```
+
+### Results observed in the November development run
+
+For the **16-feature logistic regression** on the 314-row validation partition:
+
+| Precision | Agreement with floating-point predictions | Failure recall | Illustrative screening cost |
+| --- | ---: | ---: | ---: |
+| 8-bit | 98.41% | 57.14% | 176 |
+| 12-bit | **100.00%** | 57.14% | **175** |
+| 16-bit | 99.68% | 57.14% | 176 |
+
+- **All 15 Python unit tests passed** in the development environment.
+- Cross-validation and chronological sensitivity checks completed. The chronological
+  development split had **38.10% failure recall** using a fixed 0.50 threshold;
+  this illustrates sensitivity to the validation strategy, not a deployment result.
+- Feature-stability analysis found that `sensor_059`, `sensor_103`, and
+  `sensor_510` appeared in all five feature-selection folds.
+- The Step 3 model comparison can vary with `scikit-learn` version; this run
+  selected **16-feature logistic regression** under the hypothetical cost
+  formula, whereas the earlier saved Step 3 summary selected a random forest.
+  Do not compare runs without checking the recorded software environment.
+
+### Current limitations and next steps
+
+- **RTL simulation has not yet been verified.** The SystemVerilog classifier and
+  testbench are included, but the attempted Windows `--simulate` command failed
+  because the external simulator executable was not found. Do not claim RTL
+  equivalence until that simulation passes.
+- **No FPGA/ASIC synthesis, area, power, or timing measurements yet.** The RTL
+  is currently a combinational implementation, not a clocked hardware pipeline.
+- The hardware receives **already imputed, standardized, selected features**;
+  raw-sensor preprocessing is not implemented in RTL.
+- All new experiments use development/validation rows only. The held-out test
+  partition remains unexamined for final model evaluation.
+- The cost formula `10 × false negatives + false positives` is **illustrative**;
+  it does not represent measured fab economics. SECOM sensors have anonymous
+  identities, so feature importance does not establish physical causation.
+
+**Next recommended work:** run RTL equivalence in Icarus Verilog or CI, synthesize
+with an explicit hardware target, compare resources and inference latency, then
+freeze the design before the final held-out test evaluation.
+
+See **[IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md)** for detailed hardware
+interface information and simulator instructions.
