@@ -111,5 +111,10 @@ artifacts/*.joblib
 hardware/generated/
 *.vvp
 classifier_sim
+classifier_top_sim
 *.fst
 *.vcd
+
+# Downloaded cell library and Yosys scratch from Step 5
+hardware/lib/*.lib
+hardware/synth/
