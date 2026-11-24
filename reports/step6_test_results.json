@@ -1,0 +1,52 @@
+{
+  "partition": "test",
+  "samples": 314,
+  "failures": 21,
+  "passes": 293,
+  "features": 16,
+  "bits": 12,
+  "threshold": 0.5,
+  "input_fractional_bits": 6,
+  "weight_fractional_bits": 10,
+  "coefficient_sha256": "93d756bacf54b39b15332e60e9680a113cc6fedce755366f2493a75f8488dd8c",
+  "float": {
+    "threshold": 0.5,
+    "accuracy": 0.7452229299363057,
+    "failure_precision": 0.14457831325301204,
+    "failure_recall": 0.5714285714285714,
+    "f1": 0.23076923076923078,
+    "false_positive_rate": 0.24232081911262798,
+    "pr_auc": 0.15674121798807852,
+    "roc_auc": 0.7246871444823663,
+    "tn": 222,
+    "fp": 71,
+    "fn": 9,
+    "tp": 12,
+    "screening_cost": 161
+  },
+  "fixed_point": {
+    "tp": 12,
+    "fn": 9,
+    "fp": 71,
+    "tn": 222,
+    "accuracy": 0.7452229299363057,
+    "failure_recall": 0.5714285714285714,
+    "false_positive_rate": 0.24232081911262798,
+    "failure_precision": 0.14457831325301204,
+    "screening_cost": 161
+  },
+  "agreement_with_float": 1.0,
+  "parallel_rtl": "passed",
+  "sequential_rtl": "passed",
+  "used_for_model_selection": false,
+  "limitations": [
+    "The test split has 21 failures. A recall difference of one wafer moves the rate by about 4.8%.",
+    "Feature count, bit width, and threshold were chosen on the validation split. This test score can look worse than the validation score, and it must not be used to pick a new one.",
+    "Class-weighted logistic scores are not calibrated probabilities.",
+    "Screening cost uses illustrative weights of 10 per escaped failure and 1 per false alarm. It is not a fab cost.",
+    "Sensor names are anonymous. A selected column is not a demonstrated physical cause.",
+    "The RTL sees train-median-imputed, standardized, selected features. Raw-sensor preprocessing is outside the chip.",
+    "Python/RTL agreement on this file checks the frozen integer decision. It is not a new accuracy claim beyond the counts above.",
+    "Nangate45 area and timing live in the hardware reports. They have no wire-load model, no clock tree, and no power number."
+  ]
+}

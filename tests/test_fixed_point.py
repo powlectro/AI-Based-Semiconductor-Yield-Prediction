@@ -1,6 +1,13 @@
 import unittest
 import numpy as np
-from src.fixed_point import fractional_bits, make_fixed_model, quantize, quantized_linear_predict, to_twos_hex
+from src.fixed_point import (
+    fractional_bits,
+    make_fixed_model,
+    quantize,
+    quantized_linear_predict,
+    sequential_mac_predict,
+    to_twos_hex,
+)
 
 
 class LinearModel:
@@ -29,6 +36,16 @@ class FixedPointTests(unittest.TestCase):
     def test_dimension_error(self):
         with self.assertRaises(ValueError):
             quantized_linear_predict(np.zeros((2, 3)), [1, 2], 0)
+
+    def test_sequential_mac_matches_parallel_dot(self):
+        # Verify one-MAC-per-cycle accumulation gives identical decisions to the matrix dot product.
+        rng = np.random.default_rng(0)
+        data = rng.integers(-40, 40, size=(24, 8), dtype=np.int64)
+        weights = rng.integers(-15, 15, size=8, dtype=np.int64)
+        np.testing.assert_array_equal(
+            sequential_mac_predict(data, weights, -7),
+            quantized_linear_predict(data, weights, -7),
+        )
 
     def test_scale(self):
         self.assertGreaterEqual(fractional_bits(10, 16), 0)

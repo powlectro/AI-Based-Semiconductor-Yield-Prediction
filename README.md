@@ -12,6 +12,9 @@
 - [Step 3: Model comparison](#step-3-model-comparison)
 - [Step 4: Fixed-point export and RTL simulation](#step-4-fixed-point-export-and-rtl-simulation)
 - [Step 5: Clocked wrapper and Yosys area/timing](#step-5-clocked-wrapper-and-yosys-areatiming)
+- [Frozen classifier and held-out test](#frozen-classifier-and-held-out-test)
+- [Sequential MAC](#sequential-mac)
+- [Design-space dashboard](#design-space-dashboard)
 - [Tests](#tests)
 - [Results](#results)
 - [Optional demo](#optional-demo)
@@ -50,7 +53,7 @@ The original milestone list was: leakage-safe preprocessing; proper held-out tes
 feature subset; ML baselines; threshold/cost analysis; quantization; parameter
 export; SystemVerilog inference; Python/RTL equivalence; synthesis; demo.
 Steps 1–5 below cover that list through a Nangate45 area/timing estimate.
-The held-out test and a placed-and-routed design are still open. See [Caveats and next steps](#caveats-and-next-steps).
+The held-out test has been scored once, after the classifier was frozen. A placed-and-routed design is still open. See [Caveats and next steps](#caveats-and-next-steps).
 
 ### Guardrails
 
@@ -78,11 +81,19 @@ The held-out test and a placed-and-routed design are still open. See [Caveats an
 | `hardware/classifier_tb.sv` | Combinational RTL vs Python vectors. |
 | `hardware/linear_classifier_top.sv` | 1-cycle clocked wrapper. Does not change the combinational classifier. |
 | `hardware/classifier_top_tb.sv` | Wrapper vs the same `vectors.mem` files. |
+| `hardware/linear_classifier_seq.sv` | One-multiplier sequential MAC. Latency is N cycles. |
+| `hardware/classifier_seq_tb.sv` | Back-to-back sequential MAC vs the same vectors. |
+| `scripts/06_freeze_classifier.py` | Refit logistic models and write `reports/freeze.json` if validation matches. |
+| `scripts/06_final_test.py` | One-shot held-out score of the frozen classifier. |
+| `scripts/07_sequential_mac.py` | Equivalence, area, timing, latency, and throughput vs the parallel wrapper. |
+| `scripts/08_design_space.py` | Validation accuracy-versus-cost dashboard. |
+| `dashboard/design_space.html` | The generated dashboard. |
+| `environment.yml` | Pinned Python 3.13.5, scikit-learn 1.8.0, Yosys 0.71, Icarus Verilog 12.0. |
 | `notebooks/` | Saved walkthroughs for Steps 1 and 2. |
 | `dashboard/app.py` | Optional Gradio demo. Validation rows only. |
 | `tests/` | Python unit tests. |
 | `data/raw/secom.zip` | UCI archive. |
-| `reports/` | CSV, JSON, and figures. Step 5 also writes `reports/step5_hardware_cost.md`. |
+| `reports/` | CSV, JSON, Markdown reports (Steps 5–7, `freeze.json`), and figures. |
 | `artifacts/*.joblib` | Local trained models. Gitignored. |
 | `hardware/generated/` | Exported constants and vectors. Gitignored. |
 | `hardware/lib/*.lib` | Downloaded Nangate45 liberty file. Gitignored. |
@@ -126,7 +137,7 @@ conda install -c conda-forge yosys
 
 Icarus Verilog (`iverilog` and `vvp`) must be on `PATH` for RTL simulation. Install it separately or use a CI runner that already has it.
 
-The dependency pins are open lower bounds. Rerunning Step 3 under a newer scikit-learn can change fitted coefficients and the selected validation threshold. Record package versions alongside published results, and freeze a lockfile before the final evaluation. Do **not** silently compare figures from runs under different library versions. `reports/software_environment.json` is the record from the run that produced the saved reports.
+`requirements.txt` pins NumPy 2.3.5, pandas 2.2.3, scikit-learn 1.8.0, and joblib 1.5.3. `environment.yml` also pins Python 3.13.5, Yosys 0.71, and Icarus Verilog 12.0. A newer scikit-learn can change fitted coefficients and the selected validation threshold. Do **not** silently compare figures from runs under different library versions. `reports/software_environment.json` is the record from the run that produced the saved reports. `reports/freeze.json` is the later check that this pinned stack reproduced the published logistic validation rows.
 
 ## Step 1: Dataset audit
 
@@ -348,6 +359,62 @@ Area is the sum of Nangate45 cell areas (µm²). The critical path is the longes
 
 Expect nine lines of `PASS: 314 Python/RTL vector comparisons, latency_cycles=1`, then a line `Recommended: 16 features, 12 bits.` Under the published sweep that row matches every floating-point validation decision, has screening cost 175, about 10,847 cells, 193 flip-flops, about 11,628 µm², a critical path near 2.39 ns, and an estimated fmax near 418 MHz. The full grid is in `reports/step5_hardware_cost.md`.
 
+## Frozen classifier and held-out test
+
+The hardware classifier is logistic regression with **16 features, 12-bit** coefficients, and threshold **0.50**. A 32-feature random forest has a slightly lower illustrative validation cost (172 versus 175) and stays a software-only comparison, because it is not the weighted sum in the RTL.
+
+`scripts/06_freeze_classifier.py` refits the logistic models on the saved split under the pinned stack. It writes `reports/freeze.json` only when the 8-, 16-, and 32-feature validation confusion counts match `reports/step3_validation_results.csv`. It does not score the test set. The run that produced the freeze file matched those rows, including the 16-feature result of 12 caught failures, 9 escapes, 85 false alarms, and screening cost 175.
+
+`scripts/06_final_test.py` then scores the 314 held-out rows once. It does not refit and it does not change the threshold.
+
+| Decision | Failure recall | False-positive rate | Escapes | False alarms | Screening cost | Agreement with float |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Floating point | 0.571 | 0.242 | 9 | 71 | 161 | 1.000 |
+| 12-bit, both RTLs | 0.571 | 0.242 | 9 | 71 | 161 | 1.000 |
+
+Floating-point average precision on the test rows is 0.157 and ROC-AUC is 0.725. Both the parallel wrapper and the sequential MAC matched all 314 test vectors. Validation screening cost was 175; the test cost is 161 because there were 71 false alarms instead of 85. That is a report of the frozen decision, not a reason to pick a new threshold. With 21 test failures, one wafer moves recall by about 4.8%. Full wording is in `reports/step6_test_results.md`.
+
+```bash
+conda env create -f environment.yml   # once
+conda activate secom-freeze
+python scripts/06_freeze_classifier.py
+python scripts/06_final_test.py
+```
+
+## Sequential MAC
+
+`hardware/linear_classifier_seq.sv` uses one multiplier. Accepting a sample loads the features and the constant weights into shift registers. Each later cycle multiplies the least-significant lane and shifts the next lane in. The failure bit is registered N cycles later, and a new sample can be accepted on that same edge, so throughput is fmax / N.
+
+`scripts/07_sequential_mac.py` checks every validation vector at 8, 16, and 32 features and at 8, 12, and 16 bits, then synthesizes the sequential unit with the Step 5 Nangate45 script. It also re-synthesizes the parallel 16×12 wrapper. That re-synthesis matches the published area, 11,627.7 µm², and the published critical path, 2.391 ns.
+
+At the frozen 16×12 point:
+
+| Architecture | Area (µm²) | Critical path (ns) | fmax (MHz) | Latency (cycles) | Throughput (Msamples/s) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Parallel | 11627.7 | 2.391 | 418.2 | 1 | 418.2 |
+| Sequential MAC | 9550.7 | 11.095 | 90.1 | 16 | 5.6 |
+
+The parallel design is 1.22× the sequential area and about 74× the sequential throughput. The decisions match, so validation recall and screening cost match too. The sequential critical path grows with the shift-register width. This mapper does not rebuffer the select on those registers, so part of that delay is control-net fanout. The same unbuffered script produced the parallel numbers. The table for every point is `reports/step7_sequential_mac.md`.
+
+```bash
+python scripts/07_sequential_mac.py
+```
+
+## Design-space dashboard
+
+`scripts/08_design_space.py` reads the Step 7 table and writes:
+
+- `dashboard/design_space.html`
+- `reports/figures/design_space_recall_vs_area.png`
+- `reports/figures/design_space_cost_vs_area.png`
+- `reports/figures/design_space_throughput_vs_area.png`
+
+Recall, false-positive rate, and screening cost on those plots are validation numbers. They are the numbers that were allowed to choose the feature count and the bit width. The held-out score appears once, next to the frozen 16×12 point, and it is not a point that can be selected. Open the HTML file in a browser. Hover a marker for that design's counts.
+
+```bash
+python scripts/08_design_space.py
+```
+
 ## Tests
 
 From the repository root, after installing `requirements.txt`:
@@ -356,27 +423,29 @@ From the repository root, after installing `requirements.txt`:
 python -m unittest discover -s tests -v
 ```
 
-The suite covers SECOM loading, the split, train-only scaling, the screening-cost helper, and fixed-point rounding, saturation, and the decision boundary. The development run reported **15 tests, all passing**.
+The suite covers SECOM loading, the split, train-only scaling, the screening-cost helper, and fixed-point rounding, saturation, the decision boundary, and agreement between the parallel dot product and the one-product sequential MAC. The frozen-environment run reported **16 tests, all passing**.
 
 What those tests and the RTL scripts do and do not cover:
 
 - Python integer quantization, the decision boundary, clipping, and vector packing are covered by `unittest`.
 - `scripts/04_export_fixed_point.py --simulate` marks RTL-versus-Python agreement `passed` only when Icarus exits successfully.
 - Step 5 checks the clocked wrapper the same way and adds a Nangate45 area/timing estimate. That estimate is not an FPGA bitstream or a tapeout.
-- No serial multiply-accumulate and no power number are claimed.
+- Step 7 adds the sequential MAC RTL, verifies bit-exact equivalence against the same vectors, and compares area, timing, latency, and throughput under the same Nangate45 flow. No power number is claimed.
 - The cost `10 × missed failures + 1 × false alarms` is illustrative only.
 - The chronological experiment uses **development rows only**. It is a sensitivity check, not a prospective fab study.
 
 ## Results
 
-Headline validation numbers. Full tables are in the step sections and in `reports/`.
+Headline validation, held-out test, and hardware numbers. Full tables are in the step sections and in `reports/`.
 
 - **Data.** 1,567 rows, 590 sensors, 104 failures (6.6%). Split 939 / 314 / 314 with 62 / 21 / 21 failures.
 - **Always-pass baseline.** About 93.3% validation accuracy and no failures caught.
 - **Software candidate for hardware.** 16-feature logistic regression, threshold 0.50: failure recall 57.1% (12 of 21), 85 false alarms, illustrative cost 175. A 32-feature random forest can score 172 under another scikit-learn version. The RTL exports the logistic model either way.
 - **Quantization, 16 features.** 12-bit agrees with every floating-point validation decision (cost 175). 8-bit agrees on 98.41% (cost 176). 16-bit agrees on 99.68% (cost 176).
 - **Stability.** Chronological development recall 38.10%. Sensors `sensor_059`, `sensor_103`, and `sensor_510` are selected in 5 of 5 folds.
-- **Hardware.** 1-cycle latency at every width. Recommended estimate: 16 features, 12 bits, about 11,600 µm² and about 420 MHz on Nangate45 typical, with the caveats in [Step 5](#step-5-clocked-wrapper-and-yosys-areatiming).
+- **Hardware.** 1-cycle latency at every parallel width. Recommended estimate: 16 features, 12 bits, about 11,600 µm² and about 420 MHz on Nangate45 typical, with the caveats in [Step 5](#step-5-clocked-wrapper-and-yosys-areatiming).
+- **Held-out test.** The frozen 16×12 logistic model, threshold 0.50: failure recall 0.571 (12 of 21), 71 false alarms, illustrative cost 161. The 12-bit decision matches every floating-point test decision, and both RTLs match those bits.
+- **Sequential MAC.** Same 16×12 decision in 16 cycles: about 9,550 µm², critical path about 11.1 ns, about 5.6 million samples/s. The parallel wrapper is about 1.22× the area and about 74× the throughput.
 
 ## Optional Demo
 
@@ -393,11 +462,11 @@ The Gradio demo loads **only validation sample indices** and does not expose tes
 ## Caveats and Next Steps
 
 - The hardware receives **already imputed, standardized, selected features**. Raw-sensor preprocessing is not in the RTL.
-- All fitting and model comparison use train and validation rows. The held-out test partition has not been scored.
+- All fitting and model comparison used train and validation rows. The held-out test was scored once after the freeze and was not used to change the model, the threshold, the feature count, or the bit width.
 - The cost formula does **not** represent measured fab economics. Anonymous sensors mean a selected column is not a physical cause.
-- Power is not estimated. The Nangate45 numbers are not a placed-and-routed design.
-- Validation used 21 failures. Model and threshold choice on that same set can look better than a later test.
+- Power is not estimated. The Nangate45 numbers are not a placed-and-routed design. The sequential critical path includes unbuffered control-net fanout.
+- Validation and test each contain 21 failures. One wafer moves recall by about 4.8%.
 - Probability scores from class-weighted and oversampled models may be uncalibrated.
-- RTL equivalence should be claimed only after `--simulate` or Step 5 prints `PASS` on the machine you are using.
+- RTL equivalence on this machine is the `PASS` lines from `scripts/06_final_test.py` and `scripts/07_sequential_mac.py` under Icarus Verilog 12.0.
 
-**Next recommended work:** freeze the feature count, bit width, and threshold, then score the held-out test once. Do not tune after that score. Pin the scikit-learn version before quoting a final winner. A clocked or serial multiply-accumulate, a wire-load model, and a power estimate are separate designs from the current wrapper.
+**Do not retune** the feature count, bit width, or threshold from the test score. A wire-load model, a rebuffered sequential control path, a power estimate, and a placed-and-routed design are still open.

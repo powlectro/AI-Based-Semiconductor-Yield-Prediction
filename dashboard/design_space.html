@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SECOM classifier design space</title>
+  <style>
+    body { margin: 0; background: #f7f4ee; color: #1c1c1c; font: 16px/1.45 Georgia, serif; }
+    main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 64px; }
+    h1 { font-weight: 600; font-size: 32px; margin-bottom: 8px; }
+    h2 { font-size: 22px; margin: 28px 0 8px; }
+    .legend { display: flex; gap: 18px; align-items: center; margin: 8px 0 18px; }
+    .swatch { width: 12px; height: 12px; display: inline-block; margin-right: 6px; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+    .card { background: white; border: 1px solid #e4dccb; padding: 12px 12px 4px; }
+    table { width: 100%; border-collapse: collapse; font: 13px/1.35 ui-sans-serif, sans-serif; background: white; }
+    th, td { border-bottom: 1px solid #eee; padding: 6px 8px; text-align: right; }
+    th:first-child, td:first-child { text-align: left; }
+    tr.frozen { background: #fff6dc; }
+    .panel { background: white; border: 1px solid #e4dccb; padding: 8px 18px 18px; }
+    dl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px 16px; margin: 12px 0; }
+    dt { font: 12px/1.3 ui-sans-serif, sans-serif; color: #666; }
+    dd { margin: 0; font-size: 22px; }
+    .note { color: #444; }
+    @media (max-width: 800px) { dl { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Prediction accuracy versus hardware cost</h1>
+  <p>Each point is one logistic-regression export. Recall, false-positive rate, and
+  screening cost are <strong>validation</strong> results. Area and timing are Nangate45
+  typical estimates with no wire-load model and no clock tree. Gold rings mark the
+  frozen 16-feature, 12-bit design. Hover a point for its counts.</p>
+  <div class="legend">
+    <span><i class="swatch" style="background:#1f4e79"></i>Parallel, 1-cycle datapath</span>
+    <span><i class="swatch" style="background:#d35400"></i>Sequential MAC, N-cycle datapath</span>
+  </div>
+  <div class="grid">
+    <div class="card"><svg viewBox="0 0 760 420" role="img">
+<text x="70" y="28" font-size="16" font-family="Georgia, serif">Failure recall versus area</text>
+<line x1="70.0" y1="46" x2="70.0" y2="366" stroke="#e6e6e6"/>
+<text x="70.0" y="392" text-anchor="middle" font-size="11" fill="#444">0</text>
+<line x1="204.0" y1="46" x2="204.0" y2="366" stroke="#e6e6e6"/>
+<text x="204.0" y="392" text-anchor="middle" font-size="11" fill="#444">8838</text>
+<line x1="338.0" y1="46" x2="338.0" y2="366" stroke="#e6e6e6"/>
+<text x="338.0" y="392" text-anchor="middle" font-size="11" fill="#444">17677</text>
+<line x1="472.0" y1="46" x2="472.0" y2="366" stroke="#e6e6e6"/>
+<text x="472.0" y="392" text-anchor="middle" font-size="11" fill="#444">26515</text>
+<line x1="606.0" y1="46" x2="606.0" y2="366" stroke="#e6e6e6"/>
+<text x="606.0" y="392" text-anchor="middle" font-size="11" fill="#444">35353</text>
+<line x1="740.0" y1="46" x2="740.0" y2="366" stroke="#e6e6e6"/>
+<text x="740.0" y="392" text-anchor="middle" font-size="11" fill="#444">44191</text>
+<text x="62" y="370.0" text-anchor="end" font-size="11" fill="#444">0.41</text>
+<text x="62" y="290.0" text-anchor="end" font-size="11" fill="#444">0.45</text>
+<text x="62" y="210.0" text-anchor="end" font-size="11" fill="#444">0.50</text>
+<text x="62" y="130.0" text-anchor="end" font-size="11" fill="#444">0.55</text>
+<text x="62" y="50.0" text-anchor="end" font-size="11" fill="#444">0.59</text>
+<text x="405.0" y="412" text-anchor="middle" font-size="12">Area (µm²)</text>
+<text x="18" y="206.0" text-anchor="middle" font-size="12" transform="rotate(-90 18 206.0)">Validation failure recall</text>
+<circle cx="106.4" cy="327.2" r="5" fill="#1f4e79"><title>parallel 8×8: recall 0.429, cost 181, area 2398 µm², 628.8 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="157.0" cy="327.2" r="5" fill="#1f4e79"><title>parallel 8×12: recall 0.429, cost 178, area 5736 µm², 503.8 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="227.8" cy="327.2" r="5" fill="#1f4e79"><title>parallel 8×16: recall 0.429, cost 178, area 10406 µm², 442.1 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="148.6" cy="84.8" r="5" fill="#1f4e79"><title>parallel 16×8: recall 0.571, cost 176, area 5182 µm², 545.5 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="246.3" cy="84.8" r="7" fill="#1f4e79"><title>parallel 16×12: recall 0.571, cost 175, area 11628 µm², 418.2 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="246.3" cy="84.8" r="12" fill="none" stroke="#8a6d1d" stroke-width="2"><title>parallel 16×12: recall 0.571, cost 175, area 11628 µm², 418.2 Msamples/s, latency 1 cycles</title></circle>
+<text x="262.3" y="76.8" text-anchor="start" font-size="11" fill="#1f4e79">parallel 16×12</text>
+<circle cx="389.1" cy="84.8" r="5" fill="#1f4e79"><title>parallel 16×16: recall 0.571, cost 176, area 21046 µm², 401.9 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="297.1" cy="327.2" r="5" fill="#1f4e79"><title>parallel 32×8: recall 0.429, cost 191, area 14977 µm², 334.1 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="393.7" cy="246.4" r="5" fill="#1f4e79"><title>parallel 32×12: recall 0.476, cost 178, area 21352 µm², 372.4 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="693.1" cy="246.4" r="5" fill="#1f4e79"><title>parallel 32×16: recall 0.476, cost 178, area 41096 µm², 333.9 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="156.7" cy="327.2" r="5" fill="#d35400"><title>sequential 8×8: recall 0.429, cost 181, area 5716 µm², 43.0 Msamples/s, latency 8 cycles</title></circle>
+<circle cx="183.2" cy="327.2" r="5" fill="#d35400"><title>sequential 8×12: recall 0.429, cost 178, area 7467 µm², 31.6 Msamples/s, latency 8 cycles</title></circle>
+<circle cx="210.2" cy="327.2" r="5" fill="#d35400"><title>sequential 8×16: recall 0.429, cost 178, area 9246 µm², 23.2 Msamples/s, latency 8 cycles</title></circle>
+<circle cx="177.8" cy="84.8" r="5" fill="#d35400"><title>sequential 16×8: recall 0.571, cost 176, area 7110 µm², 9.0 Msamples/s, latency 16 cycles</title></circle>
+<circle cx="214.8" cy="84.8" r="7" fill="#d35400"><title>sequential 16×12: recall 0.571, cost 175, area 9551 µm², 5.6 Msamples/s, latency 16 cycles</title></circle>
+<circle cx="214.8" cy="84.8" r="12" fill="none" stroke="#8a6d1d" stroke-width="2"><title>sequential 16×12: recall 0.571, cost 175, area 9551 µm², 5.6 Msamples/s, latency 16 cycles</title></circle>
+<text x="198.8" y="100.8" text-anchor="end" font-size="11" fill="#d35400">sequential 16×12</text>
+<circle cx="252.3" cy="84.8" r="5" fill="#d35400"><title>sequential 16×16: recall 0.571, cost 176, area 12022 µm², 3.9 Msamples/s, latency 16 cycles</title></circle>
+<circle cx="220.5" cy="327.2" r="5" fill="#d35400"><title>sequential 32×8: recall 0.429, cost 191, area 9924 µm², 2.2 Msamples/s, latency 32 cycles</title></circle>
+<circle cx="278.7" cy="246.4" r="5" fill="#d35400"><title>sequential 32×12: recall 0.476, cost 178, area 13765 µm², 1.2 Msamples/s, latency 32 cycles</title></circle>
+<circle cx="337.4" cy="246.4" r="5" fill="#d35400"><title>sequential 32×16: recall 0.476, cost 178, area 17636 µm², 0.7 Msamples/s, latency 32 cycles</title></circle>
+</svg></div>
+    <div class="card"><svg viewBox="0 0 760 420" role="img">
+<text x="70" y="28" font-size="16" font-family="Georgia, serif">Screening cost versus area</text>
+<line x1="70.0" y1="46" x2="70.0" y2="366" stroke="#e6e6e6"/>
+<text x="70.0" y="392" text-anchor="middle" font-size="11" fill="#444">0</text>
+<line x1="204.0" y1="46" x2="204.0" y2="366" stroke="#e6e6e6"/>
+<text x="204.0" y="392" text-anchor="middle" font-size="11" fill="#444">8838</text>
+<line x1="338.0" y1="46" x2="338.0" y2="366" stroke="#e6e6e6"/>
+<text x="338.0" y="392" text-anchor="middle" font-size="11" fill="#444">17677</text>
+<line x1="472.0" y1="46" x2="472.0" y2="366" stroke="#e6e6e6"/>
+<text x="472.0" y="392" text-anchor="middle" font-size="11" fill="#444">26515</text>
+<line x1="606.0" y1="46" x2="606.0" y2="366" stroke="#e6e6e6"/>
+<text x="606.0" y="392" text-anchor="middle" font-size="11" fill="#444">35353</text>
+<line x1="740.0" y1="46" x2="740.0" y2="366" stroke="#e6e6e6"/>
+<text x="740.0" y="392" text-anchor="middle" font-size="11" fill="#444">44191</text>
+<text x="62" y="370.0" text-anchor="end" font-size="11" fill="#444">172</text>
+<text x="62" y="290.0" text-anchor="end" font-size="11" fill="#444">178</text>
+<text x="62" y="210.0" text-anchor="end" font-size="11" fill="#444">183</text>
+<text x="62" y="130.0" text-anchor="end" font-size="11" fill="#444">188</text>
+<text x="62" y="50.0" text-anchor="end" font-size="11" fill="#444">194</text>
+<text x="405.0" y="412" text-anchor="middle" font-size="12">Area (µm²)</text>
+<text x="18" y="206.0" text-anchor="middle" font-size="12" transform="rotate(-90 18 206.0)">Validation screening cost</text>
+<circle cx="106.4" cy="236.3" r="5" fill="#1f4e79"><title>parallel 8×8: recall 0.429, cost 181, area 2398 µm², 628.8 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="157.0" cy="281.8" r="5" fill="#1f4e79"><title>parallel 8×12: recall 0.429, cost 178, area 5736 µm², 503.8 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="227.8" cy="281.8" r="5" fill="#1f4e79"><title>parallel 8×16: recall 0.429, cost 178, area 10406 µm², 442.1 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="148.6" cy="312.1" r="5" fill="#1f4e79"><title>parallel 16×8: recall 0.571, cost 176, area 5182 µm², 545.5 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="246.3" cy="327.2" r="7" fill="#1f4e79"><title>parallel 16×12: recall 0.571, cost 175, area 11628 µm², 418.2 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="246.3" cy="327.2" r="12" fill="none" stroke="#8a6d1d" stroke-width="2"><title>parallel 16×12: recall 0.571, cost 175, area 11628 µm², 418.2 Msamples/s, latency 1 cycles</title></circle>
+<text x="262.3" y="319.2" text-anchor="start" font-size="11" fill="#1f4e79">parallel 16×12</text>
+<circle cx="389.1" cy="312.1" r="5" fill="#1f4e79"><title>parallel 16×16: recall 0.571, cost 176, area 21046 µm², 401.9 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="297.1" cy="84.8" r="5" fill="#1f4e79"><title>parallel 32×8: recall 0.429, cost 191, area 14977 µm², 334.1 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="393.7" cy="281.8" r="5" fill="#1f4e79"><title>parallel 32×12: recall 0.476, cost 178, area 21352 µm², 372.4 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="693.1" cy="281.8" r="5" fill="#1f4e79"><title>parallel 32×16: recall 0.476, cost 178, area 41096 µm², 333.9 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="156.7" cy="236.3" r="5" fill="#d35400"><title>sequential 8×8: recall 0.429, cost 181, area 5716 µm², 43.0 Msamples/s, latency 8 cycles</title></circle>
+<circle cx="183.2" cy="281.8" r="5" fill="#d35400"><title>sequential 8×12: recall 0.429, cost 178, area 7467 µm², 31.6 Msamples/s, latency 8 cycles</title></circle>
+<circle cx="210.2" cy="281.8" r="5" fill="#d35400"><title>sequential 8×16: recall 0.429, cost 178, area 9246 µm², 23.2 Msamples/s, latency 8 cycles</title></circle>
+<circle cx="177.8" cy="312.1" r="5" fill="#d35400"><title>sequential 16×8: recall 0.571, cost 176, area 7110 µm², 9.0 Msamples/s, latency 16 cycles</title></circle>
+<circle cx="214.8" cy="327.2" r="7" fill="#d35400"><title>sequential 16×12: recall 0.571, cost 175, area 9551 µm², 5.6 Msamples/s, latency 16 cycles</title></circle>
+<circle cx="214.8" cy="327.2" r="12" fill="none" stroke="#8a6d1d" stroke-width="2"><title>sequential 16×12: recall 0.571, cost 175, area 9551 µm², 5.6 Msamples/s, latency 16 cycles</title></circle>
+<text x="198.8" y="343.2" text-anchor="end" font-size="11" fill="#d35400">sequential 16×12</text>
+<circle cx="252.3" cy="312.1" r="5" fill="#d35400"><title>sequential 16×16: recall 0.571, cost 176, area 12022 µm², 3.9 Msamples/s, latency 16 cycles</title></circle>
+<circle cx="220.5" cy="84.8" r="5" fill="#d35400"><title>sequential 32×8: recall 0.429, cost 191, area 9924 µm², 2.2 Msamples/s, latency 32 cycles</title></circle>
+<circle cx="278.7" cy="281.8" r="5" fill="#d35400"><title>sequential 32×12: recall 0.476, cost 178, area 13765 µm², 1.2 Msamples/s, latency 32 cycles</title></circle>
+<circle cx="337.4" cy="281.8" r="5" fill="#d35400"><title>sequential 32×16: recall 0.476, cost 178, area 17636 µm², 0.7 Msamples/s, latency 32 cycles</title></circle>
+</svg></div>
+    <div class="card"><svg viewBox="0 0 760 420" role="img">
+<text x="70" y="28" font-size="16" font-family="Georgia, serif">Throughput versus area</text>
+<line x1="70.0" y1="46" x2="70.0" y2="366" stroke="#e6e6e6"/>
+<text x="70.0" y="392" text-anchor="middle" font-size="11" fill="#444">0</text>
+<line x1="204.0" y1="46" x2="204.0" y2="366" stroke="#e6e6e6"/>
+<text x="204.0" y="392" text-anchor="middle" font-size="11" fill="#444">8838</text>
+<line x1="338.0" y1="46" x2="338.0" y2="366" stroke="#e6e6e6"/>
+<text x="338.0" y="392" text-anchor="middle" font-size="11" fill="#444">17677</text>
+<line x1="472.0" y1="46" x2="472.0" y2="366" stroke="#e6e6e6"/>
+<text x="472.0" y="392" text-anchor="middle" font-size="11" fill="#444">26515</text>
+<line x1="606.0" y1="46" x2="606.0" y2="366" stroke="#e6e6e6"/>
+<text x="606.0" y="392" text-anchor="middle" font-size="11" fill="#444">35353</text>
+<line x1="740.0" y1="46" x2="740.0" y2="366" stroke="#e6e6e6"/>
+<text x="740.0" y="392" text-anchor="middle" font-size="11" fill="#444">44191</text>
+<text x="62" y="370.0" text-anchor="end" font-size="11" fill="#444">0</text>
+<text x="62" y="290.0" text-anchor="end" font-size="11" fill="#444">182</text>
+<text x="62" y="210.0" text-anchor="end" font-size="11" fill="#444">365</text>
+<text x="62" y="130.0" text-anchor="end" font-size="11" fill="#444">547</text>
+<text x="62" y="50.0" text-anchor="end" font-size="11" fill="#444">729</text>
+<text x="405.0" y="412" text-anchor="middle" font-size="12">Area (µm²)</text>
+<text x="18" y="206.0" text-anchor="middle" font-size="12" transform="rotate(-90 18 206.0)">Throughput (million samples/s)</text>
+<circle cx="106.4" cy="90.1" r="5" fill="#1f4e79"><title>parallel 8×8: recall 0.429, cost 181, area 2398 µm², 628.8 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="157.0" cy="144.9" r="5" fill="#1f4e79"><title>parallel 8×12: recall 0.429, cost 178, area 5736 µm², 503.8 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="227.8" cy="172.0" r="5" fill="#1f4e79"><title>parallel 8×16: recall 0.429, cost 178, area 10406 µm², 442.1 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="148.6" cy="126.7" r="5" fill="#1f4e79"><title>parallel 16×8: recall 0.571, cost 176, area 5182 µm², 545.5 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="246.3" cy="182.5" r="7" fill="#1f4e79"><title>parallel 16×12: recall 0.571, cost 175, area 11628 µm², 418.2 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="246.3" cy="182.5" r="12" fill="none" stroke="#8a6d1d" stroke-width="2"><title>parallel 16×12: recall 0.571, cost 175, area 11628 µm², 418.2 Msamples/s, latency 1 cycles</title></circle>
+<text x="262.3" y="174.5" text-anchor="start" font-size="11" fill="#1f4e79">parallel 16×12</text>
+<circle cx="389.1" cy="189.6" r="5" fill="#1f4e79"><title>parallel 16×16: recall 0.571, cost 176, area 21046 µm², 401.9 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="297.1" cy="219.4" r="5" fill="#1f4e79"><title>parallel 32×8: recall 0.429, cost 191, area 14977 µm², 334.1 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="393.7" cy="202.6" r="5" fill="#1f4e79"><title>parallel 32×12: recall 0.476, cost 178, area 21352 µm², 372.4 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="693.1" cy="219.5" r="5" fill="#1f4e79"><title>parallel 32×16: recall 0.476, cost 178, area 41096 µm², 333.9 Msamples/s, latency 1 cycles</title></circle>
+<circle cx="156.7" cy="347.1" r="5" fill="#d35400"><title>sequential 8×8: recall 0.429, cost 181, area 5716 µm², 43.0 Msamples/s, latency 8 cycles</title></circle>
+<circle cx="183.2" cy="352.1" r="5" fill="#d35400"><title>sequential 8×12: recall 0.429, cost 178, area 7467 µm², 31.6 Msamples/s, latency 8 cycles</title></circle>
+<circle cx="210.2" cy="355.8" r="5" fill="#d35400"><title>sequential 8×16: recall 0.429, cost 178, area 9246 µm², 23.2 Msamples/s, latency 8 cycles</title></circle>
+<circle cx="177.8" cy="362.1" r="5" fill="#d35400"><title>sequential 16×8: recall 0.571, cost 176, area 7110 µm², 9.0 Msamples/s, latency 16 cycles</title></circle>
+<circle cx="214.8" cy="363.5" r="7" fill="#d35400"><title>sequential 16×12: recall 0.571, cost 175, area 9551 µm², 5.6 Msamples/s, latency 16 cycles</title></circle>
+<circle cx="214.8" cy="363.5" r="12" fill="none" stroke="#8a6d1d" stroke-width="2"><title>sequential 16×12: recall 0.571, cost 175, area 9551 µm², 5.6 Msamples/s, latency 16 cycles</title></circle>
+<text x="198.8" y="379.5" text-anchor="end" font-size="11" fill="#d35400">sequential 16×12</text>
+<circle cx="252.3" cy="364.3" r="5" fill="#d35400"><title>sequential 16×16: recall 0.571, cost 176, area 12022 µm², 3.9 Msamples/s, latency 16 cycles</title></circle>
+<circle cx="220.5" cy="365.0" r="5" fill="#d35400"><title>sequential 32×8: recall 0.429, cost 191, area 9924 µm², 2.2 Msamples/s, latency 32 cycles</title></circle>
+<circle cx="278.7" cy="365.5" r="5" fill="#d35400"><title>sequential 32×12: recall 0.476, cost 178, area 13765 µm², 1.2 Msamples/s, latency 32 cycles</title></circle>
+<circle cx="337.4" cy="365.7" r="5" fill="#d35400"><title>sequential 32×16: recall 0.476, cost 178, area 17636 µm², 0.7 Msamples/s, latency 32 cycles</title></circle>
+</svg></div>
+  </div>
+  
+    <section class="panel">
+      <h2>Held-out score of the frozen design</h2>
+      <p>16 features, 12 bits, threshold 0.50.
+      This score was not used to place or choose the points on the plots.</p>
+      <dl>
+        <div><dt>Float recall</dt><dd>0.571</dd></div>
+        <div><dt>Float false-positive rate</dt><dd>0.242</dd></div>
+        <div><dt>Float screening cost</dt><dd>161</dd></div>
+        <div><dt>12-bit agreement</dt><dd>1.000</dd></div>
+        <div><dt>12-bit recall</dt><dd>0.571</dd></div>
+        <div><dt>12-bit screening cost</dt><dd>161</dd></div>
+        <div><dt>Parallel RTL</dt><dd>passed</dd></div>
+        <div><dt>Sequential RTL</dt><dd>passed</dd></div>
+      </dl>
+      <ul><li>The test split has 21 failures. A recall difference of one wafer moves the rate by about 4.8%.</li><li>Feature count, bit width, and threshold were chosen on the validation split. This test score can look worse than the validation score, and it must not be used to pick a new one.</li><li>Class-weighted logistic scores are not calibrated probabilities.</li><li>Screening cost uses illustrative weights of 10 per escaped failure and 1 per false alarm. It is not a fab cost.</li><li>Sensor names are anonymous. A selected column is not a demonstrated physical cause.</li><li>The RTL sees train-median-imputed, standardized, selected features. Raw-sensor preprocessing is outside the chip.</li><li>Python/RTL agreement on this file checks the frozen integer decision. It is not a new accuracy claim beyond the counts above.</li><li>Nangate45 area and timing live in the hardware reports. They have no wire-load model, no clock tree, and no power number.</li></ul>
+    </section>
+    
+  <h2>Design points</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Architecture</th><th>Features</th><th>Bits</th><th>Recall</th><th>FPR</th>
+        <th>Cost</th><th>Float agreement</th><th>Latency</th><th>Interval</th>
+        <th>Msamples/s</th><th>Area µm²</th><th>Path ns</th><th>fmax MHz</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="parallel"><td>parallel</td><td>8</td><td>8</td><td>0.429</td><td>0.208</td><td>181</td><td>0.990</td><td>1</td><td>1</td><td>628.8</td><td>2398</td><td>1.59</td><td>629</td></tr>
+<tr class="sequential"><td>sequential</td><td>8</td><td>8</td><td>0.429</td><td>0.208</td><td>181</td><td>0.990</td><td>8</td><td>8</td><td>43.0</td><td>5716</td><td>2.91</td><td>344</td></tr>
+<tr class="parallel"><td>parallel</td><td>8</td><td>12</td><td>0.429</td><td>0.198</td><td>178</td><td>1.000</td><td>1</td><td>1</td><td>503.8</td><td>5736</td><td>1.98</td><td>504</td></tr>
+<tr class="sequential"><td>sequential</td><td>8</td><td>12</td><td>0.429</td><td>0.198</td><td>178</td><td>1.000</td><td>8</td><td>8</td><td>31.6</td><td>7467</td><td>3.96</td><td>253</td></tr>
+<tr class="parallel"><td>parallel</td><td>8</td><td>16</td><td>0.429</td><td>0.198</td><td>178</td><td>1.000</td><td>1</td><td>1</td><td>442.1</td><td>10406</td><td>2.26</td><td>442</td></tr>
+<tr class="sequential"><td>sequential</td><td>8</td><td>16</td><td>0.429</td><td>0.198</td><td>178</td><td>1.000</td><td>8</td><td>8</td><td>23.2</td><td>9246</td><td>5.40</td><td>185</td></tr>
+<tr class="parallel"><td>parallel</td><td>16</td><td>8</td><td>0.571</td><td>0.294</td><td>176</td><td>0.984</td><td>1</td><td>1</td><td>545.5</td><td>5182</td><td>1.83</td><td>545</td></tr>
+<tr class="sequential"><td>sequential</td><td>16</td><td>8</td><td>0.571</td><td>0.294</td><td>176</td><td>0.984</td><td>16</td><td>16</td><td>9.0</td><td>7110</td><td>6.96</td><td>144</td></tr>
+<tr class="parallel frozen"><td>parallel</td><td>16</td><td>12</td><td>0.571</td><td>0.290</td><td>175</td><td>1.000</td><td>1</td><td>1</td><td>418.2</td><td>11628</td><td>2.39</td><td>418</td></tr>
+<tr class="sequential frozen"><td>sequential</td><td>16</td><td>12</td><td>0.571</td><td>0.290</td><td>175</td><td>1.000</td><td>16</td><td>16</td><td>5.6</td><td>9551</td><td>11.09</td><td>90</td></tr>
+<tr class="parallel"><td>parallel</td><td>16</td><td>16</td><td>0.571</td><td>0.294</td><td>176</td><td>0.997</td><td>1</td><td>1</td><td>401.9</td><td>21046</td><td>2.49</td><td>402</td></tr>
+<tr class="sequential"><td>sequential</td><td>16</td><td>16</td><td>0.571</td><td>0.294</td><td>176</td><td>0.997</td><td>16</td><td>16</td><td>3.9</td><td>12022</td><td>16.12</td><td>62</td></tr>
+<tr class="parallel"><td>parallel</td><td>32</td><td>8</td><td>0.429</td><td>0.242</td><td>191</td><td>0.968</td><td>1</td><td>1</td><td>334.1</td><td>14977</td><td>2.99</td><td>334</td></tr>
+<tr class="sequential"><td>sequential</td><td>32</td><td>8</td><td>0.429</td><td>0.242</td><td>191</td><td>0.968</td><td>32</td><td>32</td><td>2.2</td><td>9924</td><td>14.35</td><td>70</td></tr>
+<tr class="parallel"><td>parallel</td><td>32</td><td>12</td><td>0.476</td><td>0.232</td><td>178</td><td>1.000</td><td>1</td><td>1</td><td>372.4</td><td>21352</td><td>2.68</td><td>372</td></tr>
+<tr class="sequential"><td>sequential</td><td>32</td><td>12</td><td>0.476</td><td>0.232</td><td>178</td><td>1.000</td><td>32</td><td>32</td><td>1.2</td><td>13765</td><td>26.41</td><td>38</td></tr>
+<tr class="parallel"><td>parallel</td><td>32</td><td>16</td><td>0.476</td><td>0.232</td><td>178</td><td>1.000</td><td>1</td><td>1</td><td>333.9</td><td>41096</td><td>2.99</td><td>334</td></tr>
+<tr class="sequential"><td>sequential</td><td>32</td><td>16</td><td>0.476</td><td>0.232</td><td>178</td><td>1.000</td><td>32</td><td>32</td><td>0.7</td><td>17636</td><td>42.76</td><td>23</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Screening cost = 10 × missed failures + 1 × false alarms on the 314-row
+  validation split. Throughput = fmax / initiation interval. The sequential interval
+  equals the feature count. A selected sensor is not a physical cause, and these
+  costs are not fab prices.</p>
+</main>
+</body>
+</html>

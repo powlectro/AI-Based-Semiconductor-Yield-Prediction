@@ -1,0 +1,68 @@
+{
+  "chosen_classifier": {
+    "family": "logistic_regression",
+    "features": 16,
+    "bits": 12,
+    "threshold": 0.5,
+    "class_weight": "balanced",
+    "solver": "liblinear",
+    "random_state": 42,
+    "artifact": "artifacts/step3_logistic_k16.joblib",
+    "coefficient_sha256": "93d756bacf54b39b15332e60e9680a113cc6fedce755366f2493a75f8488dd8c",
+    "selected_features": [
+      "sensor_059",
+      "sensor_064",
+      "sensor_065",
+      "sensor_103",
+      "sensor_114",
+      "sensor_122",
+      "sensor_125",
+      "sensor_129",
+      "sensor_180",
+      "sensor_213",
+      "sensor_249",
+      "sensor_316",
+      "sensor_351",
+      "sensor_387",
+      "sensor_510",
+      "sensor_511"
+    ],
+    "reason": "Inference is a weighted sum plus a threshold, which is the RTL datapath. On the published validation table this point has screening cost 175 and, at 12 bits, agrees with every floating-point validation decision."
+  },
+  "not_selected_for_hardware": {
+    "model": "random_forest",
+    "features": 32,
+    "threshold": 0.15,
+    "validation_screening_cost": 172,
+    "reason": "Lower illustrative validation cost than the logistic model, but a forest is not the fixed-point linear classifier that was synthesized."
+  },
+  "environment": {
+    "python": "3.13.5",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scikit_learn": "1.8.0",
+    "joblib": "1.5.3",
+    "scipy": "1.18.1"
+  },
+  "environment_matches_software_environment_json": true,
+  "validation_matches_published_step3": true,
+  "validation_k16": {
+    "tp": 12,
+    "fn": 9,
+    "fp": 85,
+    "tn": 208,
+    "failure_recall": 0.5714285714285714,
+    "false_positive_rate": 0.2901023890784983,
+    "screening_cost": 175
+  },
+  "cost_assumptions": {
+    "escaped_failure": 10,
+    "false_alarm": 1,
+    "note": "Illustrative costs, not fab prices."
+  },
+  "prohibitions": [
+    "Do not change the model, feature count, bit width, or threshold after reading the test score.",
+    "Do not refit the imputer, scaler, selector, or classifier on test rows."
+  ]
+}

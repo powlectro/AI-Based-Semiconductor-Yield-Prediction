@@ -36,6 +36,25 @@ def quantized_linear_predict(x_int, w_int, offset_int):
     return (x @ w + np.int64(offset_int)) >= 0
 
 
+def sequential_mac_predict(x_int, w_int, offset_int):
+    """Bit-accurate reference for the sequential MAC RTL.
+
+    Accumulates one feature*weight product at a time starting from offset_int,
+    matching the exact arithmetic of hardware/linear_classifier_seq.sv.
+    The RTL posts this decision N cycles after accepting a sample and can
+    accept the next sample on that same cycle.
+    """
+    x = np.asarray(x_int, dtype=np.int64)
+    w = np.asarray(w_int, dtype=np.int64)
+    if x.ndim != 2 or w.ndim != 1 or x.shape[1] != len(w):
+        raise ValueError('bad matrix/weight dimensions')
+    # Start the 64-bit accumulator at the quantized bias/threshold offset.
+    acc = np.full(x.shape[0], np.int64(offset_int), dtype=np.int64)
+    for index in range(len(w)):
+        acc = acc + x[:, index] * np.int64(w[index])
+    return acc >= 0
+
+
 def make_fixed_model(model, train_matrix, bits: int, threshold: float):
     if model.coef_.shape[0] != 1:
         raise ValueError('binary linear classifier expected')

@@ -112,6 +112,7 @@ hardware/generated/
 *.vvp
 classifier_sim
 classifier_top_sim
+classifier_seq_sim
 *.fst
 *.vcd
 
